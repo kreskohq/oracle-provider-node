@@ -6,44 +6,25 @@
             "privateKeyEnvKey": "AURORA_PRIVATE_KEY",
             "chainId": 1313161554,
             "rpc": "https://mainnet.aurora.dev"
-        },
-        {
-            "type": "near",
-            "networkId": "near-testnet",
-            "credentialsStorePathEnvKey": "NEAR_CREDENTIALS_STORE_PATH",
-            "networkType": "testnet",
-            "rpc": "https://rpc.testnet.near.org",
-            "maxGas": "300000000000000",
-            "accountId": "{{YOUR_ACCOUNT_ID_HERE}}",
-            "storageDeposit": "300800000000000000000000"
         }
     ],
     "pairs": [
         {
-            "description": "Anyone can transmit() an answer to me, I'm a FluxPriceFeed without access control!",
-            "pair": "ETH / USD",
-            "contractAddress": "0x8BAac7F07c86895cd017C8a2c7d3C72cF9f1051F",
+            "description": "TSLA / USD pricefeed contract",
+            "pair": "TSLA / USD",
+            "contractAddress": "0x39c37b1B416E995bfF040a71892E2be0F9C7dAae",
             "sources": [
                 {
-                    "source_path": "market_data.current_price.usd",
-                    "end_point": "https://api.coingecko.com/api/v3/coins/ethereum"
+                    "source_path": "quoteResponse.result[0].regularMarketPrice",
+                    "end_point": "https://yfapi.net/v6/finance/quote?symbols=TSLA",
+                    "http_method": "GET",
+                    "http_headers": {
+                        "x-api-key": "yahoo-finance-api-key"
+                    }
                 }
             ],
-            "interval": 5000,
-            "networkId": "aurora"
-        },
-        {
-            "description": "ETH / USD for NEAR",
-            "pair": "ETH / USD",
-            "contractAddress": "fpo3.franklinwaller2.testnet",
-            "sources": [
-                {
-                    "source_path": "market_data.current_price.usd",
-                    "end_point": "https://api.coingecko.com/api/v3/coins/ethereum"
-                }
-            ],
-            "interval": 5000,
-            "networkId": "near-testnet",
+            "interval": 60000,
+            "networkId": "aurora",
             "defaultDecimals": 6
         }
     ]
