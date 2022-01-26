@@ -32,6 +32,9 @@ async function main() {
         });
 
         const queues = providers.map(provider => new NetworkQueue(provider));
+        // Creating a circulair dependency in order to notify a request has been completed back to the origin
+        queues.forEach(q => q.setNetworkQueues(queues));
+
         await Promise.all(providers.map(p => p.init(queues)));
 
         const batches: Batch[] = appConfig.batches ?? [];

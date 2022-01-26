@@ -21,7 +21,7 @@ export async function getBlockByNumber(number: number, config: EvmConfig): Promi
             hash: block.hash,
             receiptsRoot: block.receiptsRoot,
             network: {
-                chainId: config.chainId,
+                bridgeChainId: config.bridgeChainId,
                 type: 'evm',
             },
         };

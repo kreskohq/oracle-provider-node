@@ -1,9 +1,11 @@
+import { BridgeChainId } from "./BridgeChainId";
+
 export interface Block {
     hash: string;
     receiptsRoot: string;
     number: number;
     network: {
-        chainId: number;
+        bridgeChainId: BridgeChainId;
         type: "evm" | "near";
     };
 }

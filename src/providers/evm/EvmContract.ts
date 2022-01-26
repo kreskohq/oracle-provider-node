@@ -1,6 +1,8 @@
 import { Contract } from '@ethersproject/contracts';
 import { Wallet } from '@ethersproject/wallet';
+import Big from 'big.js';
 import { createPairId, OracleRequest, Request } from '../../models/AppConfig';
+import { BridgeChainId } from '../../models/BridgeChainId';
 import PairInfo from '../../models/PairInfo';
 import logger from '../../services/LoggerService';
 import { EvmConfig } from './EvmConfig';
@@ -24,9 +26,22 @@ export async function createPriceFeedContract(pair: Request, wallet: Wallet): Pr
     };
 }
 
-export async function fetchOracleRequests(address: string, evmConfig: EvmConfig, wallet: Wallet): Promise<OracleRequest[]> {
+export function createOracleContract(oracleContract: string, wallet: Wallet) {
+    return new Contract(oracleContract, [], wallet.provider);
+}
+
+interface ContractRequest {
+    chainId: number;
+    layerZeroContract: string;
+    confirmations: string;
+    requestedAtBlock: string;
+}
+
+export async function fetchOracleRequests(oracleContract: string, evmConfig: EvmConfig, wallet: Wallet): Promise<OracleRequest[]> {
     try {
         // Do some fetching
+        const contract = createOracleContract(oracleContract, wallet);
+        const requests: ContractRequest[] = await contract.requests();
 
         // TODO: This should ofcourse be the block from the request itself.
         const block = await getLatestBlock(evmConfig);
@@ -37,20 +52,22 @@ export async function fetchOracleRequests(address: string, evmConfig: EvmConfig,
 
         return [
             {
+                requestId: new Big(1),
                 confirmationsRequired: 10,
                 confirmations: 0,
                 args: [],
                 toNetwork: {
-                    chainId: 1313161554,
+                    bridgeChainId: BridgeChainId.AuroraMainnet,
                     type: 'evm',
                 },
                 block,
                 toContractAddress: '0x00000',
+                fromOracleAddress: '0x00000',
                 type: 'request',
             }
         ];
     } catch (error) {
-        logger.error(`[fetchOracleRequests] ${address} ${error}`);
+        logger.error(`[fetchOracleRequests] ${oracleContract} ${error}`);
         return [];
     }
 }

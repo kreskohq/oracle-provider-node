@@ -3,7 +3,7 @@ import { Wallet } from "@ethersproject/wallet";
 import { Batch, Network, OracleRequest, Request } from "../../models/AppConfig";
 import IProvider from "../IProvider";
 import { EvmConfig, parseEvmConfig, validateEvmConfig } from "./EvmConfig";
-import { EvmPairInfo, createPriceFeedContract, fetchOracleRequests } from "./EvmContract";
+import { EvmPairInfo, createPriceFeedContract, fetchOracleRequests, createOracleContract } from "./EvmContract";
 import logger from '../../services/LoggerService';
 import { resolveSources } from '../../vm';
 import { EvmBlock, getLatestBlock } from "./EvmRpcService";
@@ -11,6 +11,7 @@ import { debouncedInterval } from "../../services/TimerUtils";
 import NetworkQueue from "../../services/NetworkQueue";
 import { Block } from "../../models/Block";
 import RequestConfirmationsDelayer from "../../services/RequestConfirmationsDelayer";
+import { ResolveRequest } from "../../models/ResolveRequest";
 
 
 class EvmProvider extends IProvider {
@@ -78,7 +79,23 @@ class EvmProvider extends IProvider {
         }
     }
 
-    async resolveRequest(request: OracleRequest): Promise<string | null> {
+    async markAsResolved(oracleContractAddress: string, resolve: ResolveRequest): Promise<void> {
+        const contract = createOracleContract(oracleContractAddress, this.wallet);
+
+        await contract.proceedUpdateBlockHeader(resolve.requestId.toString());
+    }
+
+    async resolveRequest(oracleContractAddress: string, request: OracleRequest): Promise<string | null> {
+        const contract = createOracleContract(oracleContractAddress, this.wallet);
+
+        const remoteChainId = request.block.network.bridgeChainId;
+        const oracle = oracleContractAddress;
+        const blockHash = request.block.hash;
+        const confirmations = request.confirmations;
+        const receiptRoot = request.block.receiptsRoot;
+
+        await contract.updateBlockHeader();
+
         return null;
     }
 

@@ -1,4 +1,5 @@
 import { Network } from "../../models/AppConfig";
+import { BridgeChainId } from "../../models/BridgeChainId";
 
 const PROVIDER_NAME = 'evm';
 
@@ -7,6 +8,7 @@ export interface EvmConfig {
     rpc: string;
     chainId: number;
     blockPollingInterval: number;
+    bridgeChainId: BridgeChainId;
 }
 
 export function validateEvmConfig(networkConfig: Network, env: NodeJS.ProcessEnv = {}) {
@@ -37,5 +39,6 @@ export function parseEvmConfig(networkConfig: Network, env: NodeJS.ProcessEnv = 
         chainId: Number(networkConfig.chainId ?? 0),
         rpc: networkConfig.rpc ?? '',
         blockPollingInterval: networkConfig.blockPollingInterval ?? 5_000,
+        bridgeChainId: networkConfig.bridgeChainId ?? 0,
     };
 }

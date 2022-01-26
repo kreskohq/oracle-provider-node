@@ -8,7 +8,7 @@ function findQueueForRequest(request: OracleRequest, queues: NetworkQueue[]) {
             return false;
         }
 
-        if (request.toNetwork.chainId !== queue.provider.networkConfig.chainId) {
+        if (request.toNetwork.bridgeChainId !== queue.provider.networkConfig.bridgeChainId) {
             return false;
         }
 
@@ -21,14 +21,11 @@ export function searchRequests(appConfig: AppConfig, queues: NetworkQueue[]) {
     function onRequest(request: OracleRequest) {
         const queue = findQueueForRequest(request, queues);
         if (!queue) {
-            logger.error(`[${request.block.network.type}-${request.block.network.chainId}] Could not find network ${request.toNetwork.type} with chain id ${request.toNetwork.chainId}`);
+            logger.error(`[${request.block.network.type}-${request.block.network.bridgeChainId}] Could not find network ${request.toNetwork.type} with chain id ${request.toNetwork.bridgeChainId}`);
             return;
         }
 
         queue.add(request);
-
-        console.log('[] queue -> ', queue);
-        logger.info('Im sendinnnngggg');
     }
 
     appConfig.requestListeners?.map((listenerConfig) => {

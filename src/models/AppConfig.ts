@@ -1,11 +1,16 @@
+import Big from "big.js";
 import { Block } from "./Block";
+import { BridgeChainId } from "./BridgeChainId";
+import { ResolveRequest } from "./ResolveRequest";
 import { SourceInfo } from "./SourceInfo";
 
 export interface OracleRequest {
+    requestId: Big;
     toNetwork: {
-        chainId: number;
+        bridgeChainId: BridgeChainId;
         type: "evm" | "near";
     };
+    fromOracleAddress: string;
     toContractAddress: string;
     confirmationsRequired: number;
     confirmations: number;
@@ -36,7 +41,18 @@ export interface Batch {
     networkId: string;
 }
 
-export interface EvmNetwork {
+export interface OracleAddress {
+    contractAddress: string;
+    type: 'layerzero';
+}
+
+export interface BlockBridigingNetwork {
+    bridgeChainId: BridgeChainId;
+    oracleContractAddress: string;
+}
+
+
+export interface EvmNetwork extends BlockBridigingNetwork {
     type: "evm";
     networkId?: string;
     privateKeyEnvKey?: string;
@@ -45,7 +61,7 @@ export interface EvmNetwork {
     blockPollingInterval?: number;
 }
 
-export interface NearNetwork {
+export interface NearNetwork extends BlockBridigingNetwork {
     type: "near";
     networkId?: string;
     credentialsStorePathEnvKey?: string;
@@ -57,6 +73,7 @@ export interface NearNetwork {
     maxGas?: string;
     storageDeposit?: string;
 }
+
 
 export type Network = EvmNetwork | NearNetwork;
 
@@ -73,7 +90,7 @@ export default interface AppConfig {
     requestListeners?: RequestListenerConfig[];
 }
 
-export function isOracleRequest(item: Request | Batch | OracleRequest): item is OracleRequest {
+export function isOracleRequest(item: Request | Batch | OracleRequest | ResolveRequest): item is OracleRequest {
     if (isBatch(item)) {
         return false;
     }
@@ -81,17 +98,31 @@ export function isOracleRequest(item: Request | Batch | OracleRequest): item is 
     return item.type === 'request';
 }
 
-export function isBatch(pair: Request | Batch | OracleRequest): pair is Batch {
+export function isBatch(pair: Request | Batch | OracleRequest | ResolveRequest): pair is Batch {
     return pair.hasOwnProperty('pairs');
 }
 
-export function createPairId(pair: Request | Batch | OracleRequest) {
+export function isResolve(item: Request | Batch | OracleRequest | ResolveRequest): item is ResolveRequest {
+    if (isBatch(item)) {
+        return false;
+    }
+
+    return item.type === 'resolve';
+}
+
+export function createPairId(pair: Request | Batch | OracleRequest | ResolveRequest) {
+    if (isResolve(pair)) {
+        return `${pair.type}-${pair.requestId.toString()}`;
+    }
+
+
     if (isBatch(pair)) {
         return `${pair.networkId}-${pair.description}-${pair.pairs[0].pair}-${pair.interval}`;
     }
 
+
     if (isOracleRequest(pair)) {
-        return `${pair.toContractAddress}-${pair.block.number}-${pair.confirmationsRequired}-${pair.toNetwork.chainId}-${pair.block.network.chainId}`;
+        return `${pair.toContractAddress}-${pair.block.number}-${pair.confirmationsRequired}-${pair.toNetwork.bridgeChainId}-${pair.block.network.bridgeChainId}`;
     }
 
     return `${pair.networkId}-${pair.pair}-${pair.contractAddress}`;

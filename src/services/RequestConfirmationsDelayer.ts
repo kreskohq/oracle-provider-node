@@ -15,7 +15,7 @@ export default class RequestConfirmationsDelayer {
         this.requests.forEach((request) => {
             const confirmations = block.number - request.block.number;
 
-            logger.debug(`[${request.block.network.type}-${request.block.network.chainId}] Request confirmed ${confirmations}/${request.confirmationsRequired}`);
+            logger.debug(`[${request.block.network.type}-${request.block.network.bridgeChainId}] Request confirmed ${confirmations}/${request.confirmationsRequired}`);
 
             if (confirmations >= request.confirmationsRequired) {
                 this.requests.delete(createPairId(request));

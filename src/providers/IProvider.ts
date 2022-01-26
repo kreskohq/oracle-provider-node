@@ -1,4 +1,5 @@
 import { Batch, Network, OracleRequest, Request } from "../models/AppConfig";
+import { ResolveRequest } from "../models/ResolveRequest";
 import NetworkQueue from "../services/NetworkQueue";
 export default class IProvider {
     static type = "iprovider";
@@ -11,8 +12,10 @@ export default class IProvider {
     init(queues: NetworkQueue[]): Promise<void> { return Promise.resolve() };
     onRequests(callback: (request: OracleRequest) => any) { throw new Error('Not Implemented') }
     startFetching(oracleContract: string, interval: number): Promise<void> { throw new Error('Not implemented') }
-    resolveRequest(request: OracleRequest): Promise<string | null> { throw new Error('Not implemented') }
 
+
+    markAsResolved(oracleContractAddress: string, resolve: ResolveRequest): Promise<void> { throw new Error('Not implemented') }
+    resolveRequest(oracleContractAddress: string, request: OracleRequest): Promise<string | null> { throw new Error('Not implemented') }
     resolvePair(pair: Request): Promise<string | null> { throw new Error('Not implemented'); }
     resolveBatch(batch: Batch): Promise<string | null> { throw new Error('Batching is not supported by this provider'); }
 }
